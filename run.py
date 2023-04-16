@@ -3,6 +3,11 @@ import sys
 import json
 
 from app import application
+
+from app.services.user_service import UserService
+
+from app.repos.user_repo import UserRepo
+
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -53,6 +58,25 @@ def bind_cfg_deps(app, cfg_data):
             client = MongoClient(app.db_conn_str, server_api=ServerApi('1'))
             setattr(app, "mongo_client", client)
 
+def bind_deps(app):
+    """
+    Apply dependency injection and add class dependencies to the application
+
+    Args:
+        app (obj): The encompassing flask application object
+
+    Returns:
+        None
+
+    """
+    user_repo = UserRepo(db_name=application.db_name,
+                         db_client=application.mongo_client)
+    user_service = UserService(user_repo=user_repo)
+
+    setattr(app, 'user_repo', user_repo)
+    setattr(app, 'user_service', user_service)
+
+
 if __name__ == '__main__':
 
     if len(sys.argv) != 2:
@@ -63,6 +87,7 @@ if __name__ == '__main__':
 
     cfg_data = parse_app_config(application, config_file)
     bind_cfg_deps(application, cfg_data)
+    bind_deps(application)
     
     host_name = getattr(application, 'host_name')
     host_port = getattr(application, 'host_port')

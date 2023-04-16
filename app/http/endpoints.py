@@ -14,6 +14,15 @@ def index():
     data = ex.example_json()
     return jsonify(data)
 
+@application.route("/api/test", methods=["GET"])
+def test():
+    user_service = getattr(application, 'user_service')
+    if user_service is not None:
+        users = user_service.get_all_users()
+        ex = Example()
+        data = ex.example_json()
+        return jsonify(data)
+
 @application.route("/api/register", methods=["POST"])
 def register_user():
     email = request.json["email"]
