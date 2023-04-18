@@ -28,9 +28,7 @@ def register_user():
     email = request.json["email"]
     password = request.json["password"]
 
-    print('------')
-    print(f'Your email: {email}')
-    print(f'Your password: {password}')
+    #user_service = user_serv
 
     return jsonify({
         "id": email
@@ -40,9 +38,14 @@ def register_user():
 def login_user():
     email = request.json.get("email", None)
     password = request.json.get("password", None)
-    if email != "test" or password != "test":
-        return {"msg": "Wrong email or password"}, 401
+    
+    user_service = getattr(application, 'user_service')
 
+    user_ok = user_service.verify_user(email, password)
+    
+    if not user_ok:
+        return {"msg": "Wrong email or password"}, 401
+    
     print('------')
     print(f'Your login email: {email}')
     print(f'Your login password: {password}')
