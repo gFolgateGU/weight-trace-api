@@ -28,11 +28,16 @@ def register_user():
     email = request.json["email"]
     password = request.json["password"]
 
-    #user_service = user_serv
+    user_service = getattr(application, 'user_service')
 
-    return jsonify({
-        "id": email
-    })
+    user_ok = user_service.register_user(email, password)
+
+    if user_ok:
+        return jsonify({
+            "id": email
+        })
+    else:
+        return {"msg": "Unable to register user"}, 401
 
 @application.route("/api/login", methods=["POST"])
 def login_user():
@@ -46,10 +51,6 @@ def login_user():
     if not user_ok:
         return {"msg": "Wrong email or password"}, 401
     
-    print('------')
-    print(f'Your login email: {email}')
-    print(f'Your login password: {password}')
-
     access_token = create_access_token(identity=email)
     response = { "access_token": access_token }
     return response

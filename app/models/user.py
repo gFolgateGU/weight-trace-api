@@ -1,10 +1,11 @@
 import bcrypt
 
 from bson import ObjectId
+from typing import Optional
 from pydantic import BaseModel, Field
 
 class User(BaseModel):
-    id: ObjectId = Field(alias="_id")
+    _id: Optional[str] = Field(alias="_id")
     username: str
     hashed_password: str
     salt: str

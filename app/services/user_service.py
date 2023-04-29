@@ -1,10 +1,26 @@
+from app.models.user import User
+
 class UserService(object):
     def __init__(self, user_repo):
         self._user_repo = user_repo
 
+
     def register_user(self, username, password):
         # Create a new user object with the passed in info
-        pass
+        
+        # First make sure that the user doesn't already exist
+        user = self._user_repo.get_user_by_username(username)
+
+        # Verify that user doesn't exist
+        if user:
+            return False
+
+        new_user = User.create(username, password)
+
+        success = self._user_repo.add_user(new_user)
+
+        return success
+        
     
     def verify_user(self, username, password):
         # Retrieve the user from the db
@@ -22,7 +38,8 @@ class UserService(object):
             return True
         
         return False
-    
+
+
     def get_all_users(self):
         users = self._user_repo.get_all_users()
         for user in users:
