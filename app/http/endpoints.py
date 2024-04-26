@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, redirect, session
+import requests
 from app import application
 from app.services.example import Example
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
@@ -6,6 +7,30 @@ from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
 
 application.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
 jwt = JWTManager(application)
+
+@application.route("/api/auth")
+def auth():
+    strava_auth_url = application.strava_auth_url
+    strava_client_id = application.strava_client_id
+    redirect_url = application.strava_redirect_url
+    auth_url = f"{strava_auth_url}?client_id={strava_client_id}&redirect_uri={redirect_url}&response_type=code&scope=read_all"
+    return redirect(auth_url)
+
+@application.route("/api/authcallback")
+def authcallback():
+    code = request.args.get('code')
+    data = {
+        "client_id": application.strava_client_id,
+        "client_secret": application.strava_client_secret,
+        "code": code,
+        "grant_type": "authorization_code"
+    }
+    token_url = application.strava_token_url
+    response = requests.post(token_url, data=data)
+    token = response.json().get("access_token")
+    #session["access_token"] = access_token
+    return redirect(application.strava_redirect_app_url)
+
 
 @application.route("/api/data", methods=["GET"])
 @jwt_required()

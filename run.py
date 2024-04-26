@@ -52,11 +52,24 @@ def bind_cfg_deps(app, cfg_data):
         if "db_name" in cfg_data["db_info"]:
             setattr(app, "db_name", cfg_data["db_info"]["db_name"])
         if "conn_str" in cfg_data["db_info"]:
-            setattr(app, "db_conn_str", cfg_data["db_info"]["conn_str"])
-            
+            setattr(app, "db_conn_str", cfg_data["db_info"]["conn_str"])      
             # Create a new client and connect to the server
             client = MongoClient(app.db_conn_str, server_api=ServerApi('1'))
             setattr(app, "mongo_client", client)
+
+    if "strava_api_info" in cfg_data:
+        if "client_id" in cfg_data["strava_api_info"]:
+            setattr(app, "strava_client_id", cfg_data["strava_api_info"]["client_id"])
+        if "client_secret" in cfg_data["strava_api_info"]:
+            setattr(app, "strava_client_secret", cfg_data["strava_api_info"]["client_secret"])
+        if "auth_url" in cfg_data["strava_api_info"]:
+            setattr(app, "strava_auth_url", cfg_data["strava_api_info"]["auth_url"])
+        if "redirect_url" in cfg_data["strava_api_info"]:
+            setattr(app, "strava_redirect_url", cfg_data["strava_api_info"]["redirect_url"])
+        if "redirect_app_url" in cfg_data["strava_api_info"]:
+            setattr(app, "strava_redirect_app_url", cfg_data["strava_api_info"]["redirect_app_url"])
+        if "token_url" in cfg_data["strava_api_info"]:
+            setattr(app, "strava_token_url", cfg_data["strava_api_info"]["token_url"])
 
 def bind_deps(app):
     """
