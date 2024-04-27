@@ -8,13 +8,19 @@ from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
 application.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
 jwt = JWTManager(application)
 
-@application.route("/api/auth")
+@application.route("/api/auth", methods=["GET"])
 def auth():
-    strava_auth_url = application.strava_auth_url
-    strava_client_id = application.strava_client_id
-    redirect_url = application.strava_redirect_url
-    auth_url = f"{strava_auth_url}?client_id={strava_client_id}&redirect_uri={redirect_url}&response_type=code&scope=read_all"
-    return redirect(auth_url)
+    try:
+        # Build the authorization URL
+        strava_auth_url = application.strava_auth_url
+        strava_client_id = application.strava_client_id
+        redirect_url = application.strava_redirect_url
+        auth_url = f"{strava_auth_url}?client_id={strava_client_id}&redirect_uri={redirect_url}&response_type=code&scope=read_all"
+
+        # Return the authorization URL embedded within a JSON object
+        return jsonify({"auth_url": auth_url}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @application.route("/api/authcallback")
 def authcallback():
