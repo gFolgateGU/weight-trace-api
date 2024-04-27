@@ -2,11 +2,6 @@ from flask import Flask, jsonify, request, redirect, session
 import requests
 from app import application
 from app.services.example import Example
-from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
-                               unset_jwt_cookies, jwt_required, JWTManager
-
-application.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
-jwt = JWTManager(application)
 
 @application.route("/api/auth", methods=["GET"])
 def auth():
@@ -24,22 +19,39 @@ def auth():
 
 @application.route("/api/authcallback")
 def authcallback():
-    code = request.args.get('code')
-    data = {
-        "client_id": application.strava_client_id,
-        "client_secret": application.strava_client_secret,
-        "code": code,
-        "grant_type": "authorization_code"
-    }
-    token_url = application.strava_token_url
-    response = requests.post(token_url, data=data)
-    token = response.json().get("access_token")
-    #session["access_token"] = access_token
-    return redirect(application.strava_redirect_app_url)
+    try:
+        code = request.args.get('code')
+        data = {
+            "client_id": application.strava_client_id,
+            "client_secret": application.strava_client_secret,
+            "code": code,
+            "grant_type": "authorization_code"
+        }
+        token_url = application.strava_token_url
+        response = requests.post(token_url, data=data)
+        token = response.json().get("access_token")
+        scope = response.json().get("scope")
+        if token is None:
+            return jsonify({"error": "Bad code was supplied for access token!"}), 500
+        
+        session["strava_access_token"] = token
+        session["strava_access_scope"] = scope
+        return redirect(application.strava_redirect_app_url)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+@application.route("/api/isauth", methods=["GET"])
+def is_auth():
+    if "strava_access_token" in session:
+        # User is logged in, return the profile data
+        client_token = dict()
+        client_token['token'] = 'logged_in'
+        return jsonify(client_token), 200
+    else:
+        # User is not logged in
+        return jsonify({"error": 'user must be logged in!'})
 
 @application.route("/api/data", methods=["GET"])
-@jwt_required()
 def index():
     ex = Example()
     data = ex.example_json()
@@ -86,8 +98,8 @@ def login_user():
     response = { "access_token": access_token }
     return response
 
-@application.route("/api/logout", methods=["POST"])
+@application.route("/api/logout", methods=["GET"])
 def logout_user():
+    session.clear()
     response = jsonify( {"msg": "logout successful"} )
-    unset_jwt_cookies(response)
     return response

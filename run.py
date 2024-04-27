@@ -57,6 +57,10 @@ def bind_cfg_deps(app, cfg_data):
             client = MongoClient(app.db_conn_str, server_api=ServerApi('1'))
             setattr(app, "mongo_client", client)
 
+    if "app_secrets" in cfg_data:
+        if "secret_key" in cfg_data["app_secrets"]:
+            setattr(app, "secret_key", cfg_data["app_secrets"]["secret_key"])
+
     if "strava_api_info" in cfg_data:
         if "client_id" in cfg_data["strava_api_info"]:
             setattr(app, "strava_client_id", cfg_data["strava_api_info"]["client_id"])
