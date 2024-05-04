@@ -1,10 +1,14 @@
 class HttpAuthHdr:
-    def __init__(self, access_token):
-        self.access_token = access_token
-        self.auth_hdr = dict()
+    def __init__(self, auth_hdr):
+        self.auth_hdr = auth_hdr
     
-    def build(self):
-        bearer = f'Bearer {self.access_token}'
-        self.auth_hdr["Authorization"] = bearer
+    @classmethod
+    def create(cls, access_token):
+        bearer = f'Bearer {access_token}'
+        auth_hdr = dict()
+        auth_hdr['Authorization'] = bearer
+        return cls(auth_hdr).get_auth_hdr()
+
+    def get_auth_hdr(self):
         return self.auth_hdr
         

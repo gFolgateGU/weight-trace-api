@@ -7,16 +7,11 @@ from app.util.http_auth_hdr import HttpAuthHdr
 @application.route("/api/athlete", methods=["GET"])
 def get_athlete_overview():
     if "strava_access_token" in session:
-        # User is logged in, return the profile data
-        url = application.strava_base_url + "/athlete"
-        hdr = HttpAuthHdr(session["strava_access_token"]).build()
-        response = requests.get(url, headers=hdr)
-        if response.status_code == 200:
-            data = response.json()
-            return data
-        ex = Example()
-        data = ex.example_json()
-        return jsonify(data)
+        strava_service = application.strava_service
+        athlete = strava_service.get_athlete_summary(session["strava_access_token"])
+        if athlete is None:
+            return jsonify({"error": "Unable to get athlete information"})
+        return athlete.to_json()
     else:
         # User is not logged in
         return jsonify({"error": 'user must be logged in!'})

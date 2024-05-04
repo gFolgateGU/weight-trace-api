@@ -4,6 +4,10 @@ import json
 
 from app import application
 
+from app.services.strava_service import StravaService
+
+from app.util.http_request import HttpRequest
+
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -84,7 +88,12 @@ def bind_deps(app):
         None
 
     """
-    pass
+    # Create utlity services
+    http_rqstr = HttpRequest()
+
+    # Create Services
+    strava_service = StravaService(base_url=app.strava_base_url, http_rqster=http_rqstr)
+    setattr(app, "strava_service", strava_service)
 
 
 if __name__ == '__main__':
