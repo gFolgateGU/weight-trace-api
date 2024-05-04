@@ -4,4 +4,4 @@ from flask import Flask
 application = Flask(__name__)
 application.debug = True
 
-from app.http.endpoints import *
+from app.http.auth_endpoints import *

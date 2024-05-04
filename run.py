@@ -4,10 +4,6 @@ import json
 
 from app import application
 
-from app.services.user_service import UserService
-
-from app.repos.user_repo import UserRepo
-
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
@@ -86,12 +82,7 @@ def bind_deps(app):
         None
 
     """
-    user_repo = UserRepo(db_name=application.db_name,
-                         db_client=application.mongo_client)
-    user_service = UserService(user_repo=user_repo)
-
-    setattr(app, 'user_repo', user_repo)
-    setattr(app, 'user_service', user_service)
+    pass
 
 
 if __name__ == '__main__':
