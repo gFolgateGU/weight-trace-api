@@ -5,7 +5,7 @@ class Example(object):
     def example_json(self):
         ele1 = {
             "Field1": 1,
-            "Field2": 2
+            "Field2": 22
         }
         ele2 = {
             "Field1": 3,

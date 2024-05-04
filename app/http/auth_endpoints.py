@@ -30,12 +30,11 @@ def authcallback():
         token_url = application.strava_token_url
         response = requests.post(token_url, data=data)
         token = response.json().get("access_token")
-        scope = response.json().get("scope")
+        print(response.json())
         if token is None:
             return redirect(application.strava_redirect_app_url)
         
         session["strava_access_token"] = token
-        session["strava_access_scope"] = scope
         return redirect(application.strava_redirect_app_url)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

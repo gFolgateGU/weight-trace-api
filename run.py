@@ -64,6 +64,8 @@ def bind_cfg_deps(app, cfg_data):
             setattr(app, "strava_client_secret", cfg_data["strava_api_info"]["client_secret"])
         if "auth_url" in cfg_data["strava_api_info"]:
             setattr(app, "strava_auth_url", cfg_data["strava_api_info"]["auth_url"])
+        if "base_url" in cfg_data["strava_api_info"]:
+            setattr(app, "strava_base_url", cfg_data["strava_api_info"]["base_url"])
         if "redirect_url" in cfg_data["strava_api_info"]:
             setattr(app, "strava_redirect_url", cfg_data["strava_api_info"]["redirect_url"])
         if "redirect_app_url" in cfg_data["strava_api_info"]:
