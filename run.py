@@ -5,6 +5,7 @@ import json
 from app import application
 
 from app.services.strava_service import StravaService
+from app.services.user_service import UserService
 from app.models.user import User
 
 from app.util.http_request import HttpRequest
@@ -68,6 +69,8 @@ def bind_cfg_deps(app, cfg_data):
     if "app_secrets" in cfg_data:
         if "secret_key" in cfg_data["app_secrets"]:
             setattr(app, "secret_key", cfg_data["app_secrets"]["secret_key"])
+        if "crypto_alg" in cfg_data["app_secrets"]:
+            setattr(app, "crypto_alg", cfg_data["app_secrets"]["crypto_alg"])
 
     if "strava_api_info" in cfg_data:
         if "client_id" in cfg_data["strava_api_info"]:
@@ -141,6 +144,9 @@ def bind_deps(app):
     strava_service = StravaService(base_url=app.strava_base_url, http_rqster=http_rqstr)
     setattr(app, "strava_service", strava_service)
 
+    user_service = UserService()
+    setattr(app, "user_service", user_service)
+
     # Create database instance
     db_user = app.db_username
     db_password = app.db_password
@@ -151,7 +157,7 @@ def bind_deps(app):
     engine = create_engine(database_url)
     db = sessionmaker(bind=engine)
     setattr(app, "db", db)
-    create_user(app, "grant", "grant@grant.com", 1234, "abcdefghijklmnopqrtstuv")
+    #create_user(app, "grant", "grant@grant.com", 1234, "abcdefghijklmnopqrtstuv")
 
 if __name__ == '__main__':
 

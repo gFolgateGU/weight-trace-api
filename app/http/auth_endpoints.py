@@ -2,6 +2,9 @@ from flask import Flask, jsonify, request, redirect, session
 import requests
 from app import application
 from app.services.example import Example
+from app.services.user_service import UserService
+from app.util.token_gen import generate_session_token
+from app.models.user import User
 
 @application.route("/api/auth", methods=["GET"])
 def auth():
@@ -30,11 +33,19 @@ def authcallback():
         token_url = application.strava_token_url
         response = requests.post(token_url, data=data)
         token = response.json().get("access_token")
-        print(response.json())
+        athlete = response.json().get("athlete")
+
         if token is None:
             return redirect(application.strava_redirect_app_url)
-        
+
+        user_service = application.user_service
+        auth_user = user_service.create_user(strava_id=athlete["id"],
+                                             username=athlete["username"])
+
+        session_token = generate_session_token(auth_user.strava_id)
+
         session["strava_access_token"] = token
+        session["session_token"] = session_token
         return redirect(application.strava_redirect_app_url)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

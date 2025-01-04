@@ -9,6 +9,5 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, autoincrement=True)
     strava_id = Column(BigInteger, unique=True, nullable=False)
     username = Column(String(255), unique=True, nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
     strava_token = Column(String(255), nullable=True)
     created_at = Column(TIMESTAMP, default=datetime.utcnow)

@@ -6,3 +6,4 @@ application.debug = True
 
 from app.http.auth_endpoints import *
 from app.http.strava_endpoints import *
+from app.util.token_gen import *
