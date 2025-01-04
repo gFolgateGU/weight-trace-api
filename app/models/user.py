@@ -1,34 +1,14 @@
-import bcrypt
+from sqlalchemy import Column, Integer, BigInteger, String, TIMESTAMP
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 
-from bson import ObjectId
-from typing import Optional
-from pydantic import BaseModel, Field
+Base = declarative_base()
 
-class User(BaseModel):
-    _id: Optional[str] = Field(alias="_id")
-    username: str
-    hashed_password: str
-    salt: str
-
-    class Config:
-        arbitrary_types_allowed = True
-
-    @classmethod
-    def create(cls, username: str, password: str):
-        salt = bcrypt.gensalt().decode('utf-8')
-        salted_password = (password + salt).encode('utf-8')
-        hashed_password = bcrypt.hashpw(salted_password, bcrypt.gensalt()).decode('utf-8')
-        return cls(username=username, hashed_password=hashed_password, salt=salt)
-    
-    def to_json(self):
-        return self.json()
-
-    def to_bson(self):
-        return self.dict(by_alias=True, exclude_unset=True)
-
-    def verify_password(self, password: str):
-        salted_password = (password + self.salt).encode('utf-8')
-        hashed_password = bcrypt.hashpw(salted_password, self.hashed_password.encode('utf-8'))
-        return hashed_password == self.hashed_password.encode('utf-8')
-
-    
+class User(Base):
+    __tablename__ = 'users'
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    strava_id = Column(BigInteger, unique=True, nullable=False)
+    username = Column(String(255), unique=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    strava_token = Column(String(255), nullable=True)
+    created_at = Column(TIMESTAMP, default=datetime.utcnow)

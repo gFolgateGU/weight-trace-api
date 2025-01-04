@@ -5,11 +5,16 @@ import json
 from app import application
 
 from app.services.strava_service import StravaService
+from app.models.user import User
 
 from app.util.http_request import HttpRequest
 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+import psycopg2
 
 def parse_app_config(app, config_file):
     """
@@ -49,13 +54,16 @@ def bind_cfg_deps(app, cfg_data):
             setattr(app, "host_port", cfg_data["host_info"]["port"])
 
     if "db_info" in cfg_data:
-        if "db_name" in cfg_data["db_info"]:
-            setattr(app, "db_name", cfg_data["db_info"]["db_name"])
-        if "conn_str" in cfg_data["db_info"]:
-            setattr(app, "db_conn_str", cfg_data["db_info"]["conn_str"])      
-            # Create a new client and connect to the server
-            client = MongoClient(app.db_conn_str, server_api=ServerApi('1'))
-            setattr(app, "mongo_client", client)
+        if "server" in cfg_data["db_info"]:
+            setattr(app, "db_host", cfg_data["db_info"]["server"])
+        if "database" in cfg_data["db_info"]:
+            setattr(app, "db_name", cfg_data["db_info"]["database"])
+        if "port" in cfg_data["db_info"]:
+            setattr(app, "db_port", cfg_data["db_info"]["port"])
+        if "username" in cfg_data["db_info"]:
+            setattr(app, "db_username", cfg_data["db_info"]["username"])
+        if "password" in cfg_data["db_info"]:
+            setattr(app, "db_password", cfg_data["db_info"]["password"])
 
     if "app_secrets" in cfg_data:
         if "secret_key" in cfg_data["app_secrets"]:
@@ -77,6 +85,44 @@ def bind_cfg_deps(app, cfg_data):
         if "token_url" in cfg_data["strava_api_info"]:
             setattr(app, "strava_token_url", cfg_data["strava_api_info"]["token_url"])
 
+def create_user(app, username, email, strava_id, strava_token=None):
+    session = None
+    try:
+        # Start a new session
+        session = app.db()
+        
+
+        # Check if a user exists
+        existing_user = session.query(User).filter((User.username == username) | (User.email == email)).first()
+        if existing_user:
+            return
+
+        # Create a new user instance
+        new_user = User(
+            username=username,
+            email=email,
+            strava_id=strava_id,
+            strava_token=strava_token
+        )
+        
+        # Add the user to the session
+        session.add(new_user)
+        
+        # Commit the transaction
+        session.commit()
+        
+        print("User created successfully")
+    except Exception as error:
+        # Roll back the transaction in case of an error
+        if session:
+            session.rollback()
+        print(f"Error: {error}")
+    finally:
+        # Close the session
+        if session:
+            session.close()
+
+
 def bind_deps(app):
     """
     Apply dependency injection and add class dependencies to the application
@@ -95,6 +141,17 @@ def bind_deps(app):
     strava_service = StravaService(base_url=app.strava_base_url, http_rqster=http_rqstr)
     setattr(app, "strava_service", strava_service)
 
+    # Create database instance
+    db_user = app.db_username
+    db_password = app.db_password
+    db_host = app.db_host
+    db_name = app.db_name
+    db_port = app.db_port
+    database_url = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    engine = create_engine(database_url)
+    db = sessionmaker(bind=engine)
+    setattr(app, "db", db)
+    create_user(app, "grant", "grant@grant.com", 1234, "abcdefghijklmnopqrtstuv")
 
 if __name__ == '__main__':
 
