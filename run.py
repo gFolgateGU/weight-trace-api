@@ -6,7 +6,6 @@ from app import application
 
 from app.services.strava_service import StravaService
 from app.services.user_service import UserService
-from app.models.user import User
 
 from app.util.http_request import HttpRequest
 
@@ -88,44 +87,6 @@ def bind_cfg_deps(app, cfg_data):
         if "token_url" in cfg_data["strava_api_info"]:
             setattr(app, "strava_token_url", cfg_data["strava_api_info"]["token_url"])
 
-def create_user(app, username, email, strava_id, strava_token=None):
-    session = None
-    try:
-        # Start a new session
-        session = app.db()
-        
-
-        # Check if a user exists
-        existing_user = session.query(User).filter((User.username == username) | (User.email == email)).first()
-        if existing_user:
-            return
-
-        # Create a new user instance
-        new_user = User(
-            username=username,
-            email=email,
-            strava_id=strava_id,
-            strava_token=strava_token
-        )
-        
-        # Add the user to the session
-        session.add(new_user)
-        
-        # Commit the transaction
-        session.commit()
-        
-        print("User created successfully")
-    except Exception as error:
-        # Roll back the transaction in case of an error
-        if session:
-            session.rollback()
-        print(f"Error: {error}")
-    finally:
-        # Close the session
-        if session:
-            session.close()
-
-
 def bind_deps(app):
     """
     Apply dependency injection and add class dependencies to the application
@@ -157,7 +118,6 @@ def bind_deps(app):
     engine = create_engine(database_url)
     db = sessionmaker(bind=engine)
     setattr(app, "db", db)
-    #create_user(app, "grant", "grant@grant.com", 1234, "abcdefghijklmnopqrtstuv")
 
 if __name__ == '__main__':
 

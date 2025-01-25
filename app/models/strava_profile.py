@@ -29,5 +29,3 @@ class StravaProfile:
 
     def to_json(self):
         return asdict(self)
-        
-

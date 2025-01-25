@@ -4,7 +4,7 @@ from app import application
 from app.services.example import Example
 from app.services.user_service import UserService
 from app.util.token_gen import generate_session_token
-from app.models.user import User
+from app.models.models import User
 
 @application.route("/api/auth", methods=["GET"])
 def auth():
@@ -40,8 +40,10 @@ def authcallback():
 
         user_service = application.user_service
         auth_user = user_service.create_user(strava_id=athlete["id"],
-                                             username=athlete["username"])
+                                             username=athlete["username"],
+                                             strava_token=token)
 
+        print(response.json())
         session_token = generate_session_token(auth_user.strava_id)
 
         session["strava_access_token"] = token
