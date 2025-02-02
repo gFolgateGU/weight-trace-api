@@ -9,7 +9,6 @@ class UserService:
         new_user = None
         session = None
         try:
-            print("cmonnnn")
             # Start a new session
             session = application.db()
             

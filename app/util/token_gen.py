@@ -9,6 +9,7 @@ def generate_session_token(user_id):
         "exp": datetime.utcnow() + timedelta(hours=1)
     }
     token = jwt.encode(payload, application.secret_key, algorithm=application.crypto_alg)
+    return token
 
 def decode_session_token(token):   
     try:
