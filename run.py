@@ -8,6 +8,7 @@ from app.services.strava_service import StravaService
 from app.services.user_service import UserService
 
 from app.util.http_request import HttpRequest
+from app.util.lru_cache import LRUCache
 
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -100,9 +101,10 @@ def bind_deps(app):
     """
     # Create utlity services
     http_rqstr = HttpRequest()
+    lru_cache = LRUCache(100)
 
     # Create Services
-    strava_service = StravaService(base_url=app.strava_base_url, http_rqster=http_rqstr)
+    strava_service = StravaService(base_url=app.strava_base_url, http_rqster=http_rqstr, lru_cache=lru_cache)
     setattr(app, "strava_service", strava_service)
 
     user_service = UserService()
