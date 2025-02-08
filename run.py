@@ -4,6 +4,7 @@ import json
 
 from app import application
 
+from app.services.activity_service import ActivityService
 from app.services.strava_service import StravaService
 from app.services.user_service import UserService
 
@@ -104,9 +105,10 @@ def bind_deps(app):
     lru_cache = LRUCache(100)
 
     # Create Services
+    activity_service = ActivityService()
+    setattr(app, "activity_service", activity_service)
     strava_service = StravaService(base_url=app.strava_base_url, http_rqster=http_rqstr, lru_cache=lru_cache)
     setattr(app, "strava_service", strava_service)
-
     user_service = UserService()
     setattr(app, "user_service", user_service)
 
